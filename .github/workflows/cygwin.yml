@@ -3,7 +3,7 @@ name: cygwin-dll
 on:
   push:
     branches:
-      - master  # trigger on push to master
+      - main
 
 permissions:
   contents: write 
