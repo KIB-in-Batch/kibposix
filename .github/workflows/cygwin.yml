@@ -52,7 +52,7 @@ jobs:
         run: |
           mkdir build install
           (cd winsup && ./autogen.sh)
-          (cd build && ../configure --target=${{ matrix.target }} --prefix=$(realpath $(pwd)/../install))
+          (cd build && ../configure --target=${{ matrix.target }} --prefix=$(realpath $(pwd)/../install) --disable-doc)
           make -C build
           # copy DLLs to release folder
           mkdir -p ../release
