@@ -71,10 +71,9 @@ jobs:
         (cd winsup; ./autogen.sh) &&
         cd build &&
         ../configure --prefix=/usr -v &&
-        export MAKEFLAGS=-j$(nproc) &&
-        make &&
+        make -j$(nproc) &&
         export CYGWIN=winsymlinks:sys &&
-        make install -j1 tooldir=/usr gcc_tooldir=/usr DESTDIR=${DESTDIR} &&
+        make install -j$(nproc) tooldir=/usr gcc_tooldir=/usr DESTDIR=${DESTDIR} &&
         (cd */newlib; make info man) &&
         (cd */newlib; make install-info install-man tooldir=/usr gcc_tooldir=/usr DESTDIR=${DESTDIR})
       shell: bash --noprofile --norc -eo pipefail '{0}'
@@ -83,6 +82,20 @@ jobs:
       run: |
         mv -v install/usr/bin install/bin
         mv -v install/usr/lib install/lib
+      shell: bash --noprofile --norc -o igncr -eo pipefail '{0}'
+
+    - name: Copy Cygwin DLLs from /usr/bin to install
+      run: |
+        mkdir -p install/bin
+        # Copy Cygwin DLLs that are not already present
+        for dll in /usr/bin/cyg*.dll; do
+          [ -f "$dll" ] || continue  # Skip if no matches
+          dll_name=$(basename "$dll")
+          if [ ! -f "install/bin/$dll_name" ]; then
+            echo "Copying $dll_name to install/bin/"
+            cp "$dll" "install/bin/"
+          fi
+        done
       shell: bash --noprofile --norc -o igncr -eo pipefail '{0}'
 
     - name: Make Cygwin installation artifact
