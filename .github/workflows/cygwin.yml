@@ -20,14 +20,14 @@ jobs:
     name: Windows native ${{ matrix.pkgarch }}
 
     steps:
-    - uses: actions/checkout@v5
-
     - run: git config --global core.autocrlf input
 
-    - name: Adjust permissions
+    - name: adjust permissions
       run: |
         icacls . /inheritance:r
         icacls . /grant Administrators:F
+
+    - uses: actions/checkout@v5
 
     - name: Install Cygwin
       uses: cygwin/cygwin-install-action@master
@@ -67,7 +67,7 @@ jobs:
         export PATH=/usr/bin:$(cygpath ${SYSTEMROOT})/system32 &&
         export DESTDIR=$(realpath $(pwd)/install) &&
         mkdir build install &&
-        (cd winsup; dos2unix autogen.sh; chmod +x autogen.sh; bash autogen.sh) &&
+        (cd winsup; ./autogen.sh) &&
         cd build &&
         ../configure --prefix=/usr -v &&
         export MAKEFLAGS=-j$(nproc) &&
@@ -84,6 +84,12 @@ jobs:
         mv -v install/usr/lib install/lib
       shell: bash --noprofile --norc -o igncr -eo pipefail '{0}'
 
+    - name: Make Cygwin installation artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: cygwin-install-${{ matrix.pkgarch }}
+        path: |
+          install
     - name: Create install.zip
       run: |
         cd install
