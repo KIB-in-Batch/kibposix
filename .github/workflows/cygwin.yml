@@ -101,6 +101,7 @@ jobs:
     - name: Create Git tag
       id: create_tag
       run: |
+        git config --global --add safe.directory /cygdrive/d/a/kibposix/kibposix
         TAG_NAME="release-$(date -u +'%Y%m%dT%H%M%SZ')"
         git tag $TAG_NAME
         git push origin $TAG_NAME
