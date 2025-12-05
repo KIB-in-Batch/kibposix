@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: write 
+  contents: write
 
 jobs:
   build-dll:
@@ -29,13 +29,15 @@ jobs:
           dnf install -y autoconf automake gawk make patch perl \
             mingw${{ matrix.pkgarch }}-gcc-c++ \
             mingw${{ matrix.pkgarch }}-winpthreads-static \
-            mingw${{ matrix.pkgarch }}-zlib-static
+            mingw${{ matrix.pkgarch }}-zlib-static \
+            # + common build dependencies 
+            gcc gcc-c++ make gettext-devel libiconv-devel zlib-devel
 
       # enable 'dnf copr'
-      - name: Enable 'dnf copr'
+      - name: Enable dnf copr
         run: dnf install -y dnf-plugins-core
 
-      # install cross-Cygwin toolchain
+      # install cross-Cygwin toolchain and dependencies
       - name: Install cross-Cygwin toolchain and cocom
         run: |
           dnf copr enable -y yselkowitz/cygwin
@@ -48,20 +50,33 @@ jobs:
             cocom
 
       # build DLL only
-      - name: Build DLL
+      - name: Build Cygwin DLL
         run: |
-          mkdir build install
-          (cd winsup && ./autogen.sh)
-          (cd build && ../configure --target=${{ matrix.target }} --prefix=$(realpath $(pwd)/../install) --disable-doc)
-          make -C build
-          # copy DLLs to release folder
-          mkdir -p ../release
-          find build -name "*.dll" -exec cp {} ../release/ \;
+          set -eux
+          mkdir build install release
+          cd winsup
+          ./autogen.sh
+          cd ../build
+          ../configure \
+            --target=${{ matrix.target }} \
+            --prefix=$(realpath ../install) \
+            --disable-doc \
+            --without-cross-bootstrap
+          make -j$(nproc)
+          # inspect the build tree
+          ls -R . | tee build-tree.txt
+          # copy any .dll to release folder
+          find . -iname "*.dll" -exec cp {} ../release/ \;
 
-      # create GitHub Release with DLL
+      # list release contents for debug
+      - name: List release
+        run: ls -l release
+
+      # create GitHub Release with DLL (if any)
       - name: Create GitHub Release
+        if: success() && (always())  # release even if empty, for diagnostics
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.sha }}
           name: Release ${{ github.sha }}
-          files: release/*.dll
+          files: release/*.dll || echo "No DLL found"
