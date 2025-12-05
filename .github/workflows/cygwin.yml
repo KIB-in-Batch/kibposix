@@ -60,6 +60,7 @@ jobs:
           texlive-collection-latexrecommended,
           texlive-collection-pictures,
           xmlto,
+          zip,
           zlib-devel
 
     - name: Build Cygwin
