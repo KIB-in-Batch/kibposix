@@ -63,26 +63,26 @@ jobs:
           zlib-devel
 
     - name: Build Cygwin
-      run: |
-        export PATH=/usr/bin:$(cygpath ${SYSTEMROOT})/system32
-        export DESTDIR=$(realpath $(pwd)/install)
-        mkdir build install
-        (cd winsup && ./autogen.sh)
-        cd build
-        ../configure --prefix=/usr -v
-        export MAKEFLAGS=-j$(nproc)
-        make
-        export CYGWIN=winsymlinks:sys
-        make install -j1 tooldir=/usr gcc_tooldir=/usr DESTDIR=${DESTDIR}
-        (cd */newlib && make info man)
-        (cd */newlib && make install-info install-man tooldir=/usr gcc_tooldir=/usr DESTDIR=${DESTDIR})
-      shell: bash --noprofile --norc -o igncr -eo pipefail '{0}' 
+      run: >-
+        export PATH=/usr/bin:$(cygpath ${SYSTEMROOT})/system32 &&
+        export DESTDIR=$(realpath $(pwd)/install) &&
+        mkdir build install &&
+        (cd winsup; ./autogen.sh) &&
+        cd build &&
+        ../configure --prefix=/usr -v &&
+        export MAKEFLAGS=-j$(nproc) &&
+        make &&
+        export CYGWIN=winsymlinks:sys &&
+        make install -j1 tooldir=/usr gcc_tooldir=/usr DESTDIR=${DESTDIR} &&
+        (cd */newlib; make info man) &&
+        (cd */newlib; make install-info install-man tooldir=/usr gcc_tooldir=/usr DESTDIR=${DESTDIR})
+      shell: bash --noprofile --norc -eo pipefail '{0}'
 
     - name: Rearrange for default mountpoints
       run: |
         mv -v install/usr/bin install/bin
         mv -v install/usr/lib install/lib
-      shell: bash --noprofile --norc -o igncr -eo pipefail
+      shell: bash --noprofile --norc -o igncr -eo pipefail '{0}'
 
     - name: Create install.zip
       run: |
