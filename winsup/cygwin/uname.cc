@@ -37,8 +37,8 @@ uname_x (struct utsname *name)
 
       memset (name, 0, sizeof (*name));
       /* sysname */
-      n = __small_sprintf (name->sysname, "CYGWIN_%s-%u",
-			   wincap.osname (), wincap.build_number ());
+      n = __small_sprintf (name->sysname, "Linux");
+
       if (wincap.host_machine () != wincap.cygwin_machine ())
 	{
 	  switch (wincap.host_machine ())
