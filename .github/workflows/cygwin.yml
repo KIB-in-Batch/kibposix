@@ -6,7 +6,7 @@ on:
       - master  # trigger on push to master
 
 permissions:
-  contents: write
+  contents: write 
 
 jobs:
   build-dll:
