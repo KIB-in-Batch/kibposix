@@ -67,7 +67,7 @@ jobs:
         export PATH=/usr/bin:$(cygpath ${SYSTEMROOT})/system32 &&
         export DESTDIR=$(realpath $(pwd)/install) &&
         mkdir build install &&
-        (cd winsup; ./autogen.sh) &&
+        (cd winsup; chmod +x autogen.sh; ./autogen.sh) &&
         cd build &&
         ../configure --prefix=/usr -v &&
         export MAKEFLAGS=-j$(nproc) &&
